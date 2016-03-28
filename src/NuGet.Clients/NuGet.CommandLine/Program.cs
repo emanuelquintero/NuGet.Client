@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Reflection;
+using System.Resources;
 using System.Text;
 using NuGet.Common;
 using NuGet.Protocol;
@@ -33,6 +35,11 @@ namespace NuGet.CommandLine
 
         public static int Main(string[] args)
         {
+            var usa = CultureInfo.GetCultureInfo("en-US");
+            NuGetResources.Culture = usa;
+            NuGetCommand.Culture = usa;
+            LocalizedResourceManager.ResourceCulture = usa;
+
 #if DEBUG
             if (args.Contains("--debug", StringComparer.OrdinalIgnoreCase))
             {

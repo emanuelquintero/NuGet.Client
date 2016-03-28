@@ -6,6 +6,7 @@ namespace NuGet
 {
     internal static class LocalizedResourceManager
     {
+        public static CultureInfo ResourceCulture { get; set; }
         private static readonly ResourceManager _resourceManager = new ResourceManager("NuGet.CommandLine.NuGetResources", typeof(LocalizedResourceManager).Assembly);
 
         public static string GetString(string resourceName)
@@ -22,15 +23,19 @@ namespace NuGet
         /// <returns>the 3 letter language name used to locate localized resources.</returns>
         public static string GetLanguageName()
         {
-            var culture = Thread.CurrentThread.CurrentUICulture;
-            while (!culture.IsNeutralCulture)
+            CultureInfo culture = ResourceCulture;
+            if (culture == null)
             {
-                if (culture.Parent == culture)
+                culture = Thread.CurrentThread.CurrentUICulture;
+                while (!culture.IsNeutralCulture)
                 {
-                    break;
-                }
+                    if (culture.Parent == culture)
+                    {
+                        break;
+                    }
 
-                culture = culture.Parent;
+                    culture = culture.Parent;
+                }
             }
 
             return culture.ThreeLetterWindowsLanguageName.ToLowerInvariant();
