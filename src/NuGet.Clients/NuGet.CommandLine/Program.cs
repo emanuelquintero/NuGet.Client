@@ -35,6 +35,15 @@ namespace NuGet.CommandLine
 
         public static int Main(string[] args)
         {
+            var resources = AppDomain
+                .CurrentDomain
+                .GetAssemblies()
+                .SelectMany(a => a.GetTypes())
+                .Where(t => t.Namespace.StartsWith("NuGet"))
+                .Where(t => t.GetProperty("ResourceManager")?.PropertyType == typeof(ResourceManager))
+                .Where(t => t.GetProperty("Culture")?.PropertyType == typeof(CultureInfo));
+
+
             var usa = CultureInfo.GetCultureInfo("en-US");
             NuGetResources.Culture = usa;
             NuGetCommand.Culture = usa;
