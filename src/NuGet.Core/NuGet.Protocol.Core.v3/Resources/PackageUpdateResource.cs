@@ -280,6 +280,7 @@ namespace NuGet.Protocol.Core.Types
             //not tied to actual package name.  
             content.Add(packageContent, "package", "package.nupkg");
             request.Content = content;
+            request.Headers.TransferEncodingChunked = true;
 
             if (!string.IsNullOrEmpty(apiKey))
             {
