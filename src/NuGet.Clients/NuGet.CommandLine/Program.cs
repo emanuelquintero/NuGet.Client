@@ -9,6 +9,7 @@ using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Resources;
+using System.Runtime.CompilerServices;
 using System.Text;
 using NuGet.Common;
 using NuGet.Protocol;
@@ -35,20 +36,6 @@ namespace NuGet.CommandLine
 
         public static int Main(string[] args)
         {
-            var resources = AppDomain
-                .CurrentDomain
-                .GetAssemblies()
-                .SelectMany(a => a.GetTypes())
-                .Where(t => t.Namespace.StartsWith("NuGet"))
-                .Where(t => t.GetProperty("ResourceManager")?.PropertyType == typeof(ResourceManager))
-                .Where(t => t.GetProperty("Culture")?.PropertyType == typeof(CultureInfo));
-
-
-            var usa = CultureInfo.GetCultureInfo("en-US");
-            NuGetResources.Culture = usa;
-            NuGetCommand.Culture = usa;
-            LocalizedResourceManager.ResourceCulture = usa;
-
 #if DEBUG
             if (args.Contains("--debug", StringComparer.OrdinalIgnoreCase))
             {
@@ -56,6 +43,20 @@ namespace NuGet.CommandLine
                 System.Diagnostics.Debugger.Launch();
             }
 #endif
+
+            var resources = AppDomain
+                .CurrentDomain
+                .GetAssemblies()
+                .SelectMany(a => a.GetTypes())
+                .Where(t => t.Namespace != null && t.Namespace.StartsWith("NuGet", StringComparison.Ordinal))
+                .Where(t => t.GetProperty("ResourceManager", BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static) != null)
+                .Where(t => t.GetProperty("Culture", BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static) != null)
+                .ToArray();
+
+            var usa = CultureInfo.GetCultureInfo("en-US");
+            NuGetResources.Culture = usa;
+            NuGetCommand.Culture = usa;
+            LocalizedResourceManager.ResourceCulture = usa;
 
             return MainCore(Directory.GetCurrentDirectory(), args);
         }
